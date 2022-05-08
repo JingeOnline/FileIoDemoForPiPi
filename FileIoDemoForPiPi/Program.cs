@@ -20,6 +20,7 @@ namespace FileIoDemoForPiPi
 
         static void Main(string[] args)
         {
+            Console.WriteLine("Welcome to FileIoDemoForPiPi app!\n");
             ReadFile();
             while (true)
             {
@@ -33,14 +34,31 @@ namespace FileIoDemoForPiPi
         /// <returns></returns>
         public static void ReadFile()
         {
-            string[] lines = File.ReadAllLines(FilePath);
-            List<string> lineList = new List<string>(lines);
-            lineList.RemoveAt(0);
-            foreach (string line in lineList)
+            List<string> lineList = new List<string>();
+            try
             {
-                Student student = new Student(line);
-                StudentList.Add(student);
+                string[] lines = File.ReadAllLines(FilePath);
+                lineList = new List<string>(lines);
+                lineList.RemoveAt(0);
             }
+            catch
+            {
+                ConsoleWriteRedLine("Cannot find or read the file: " + FilePath);
+            }
+            try
+            {
+                foreach (string line in lineList)
+                {
+                    Student student = new Student(line);
+                    StudentList.Add(student);
+                }
+            }
+            catch
+            {
+                ConsoleWriteRedLine("Cannot parse records, the file format is not match with [Id],[Name],[History],[Math],[Physics],[Geography].");
+            }
+
+
         }
 
         /// <summary>
@@ -167,7 +185,7 @@ namespace FileIoDemoForPiPi
             //后面添加一个空行，为了美观
             Console.WriteLine();
             //指定Id，获取该学生对象
-            Student student = StudentList.FirstOrDefault(x => x.Id.ToString() == line || x.Name.ToUpper()==line.ToUpper());
+            Student student = StudentList.FirstOrDefault(x => x.Id.ToString() == line || x.Name.ToUpper() == line.ToUpper());
             if (student == null)
             {
                 ConsoleWriteRedLine("Cannot find the student. Please check your input and enter again.\n");
@@ -190,14 +208,14 @@ namespace FileIoDemoForPiPi
             try
             {
                 List<string> lines = StudentList.Select(x => x.ToSaveString()).ToList();
-                lines.Insert(0,Student.GetHeaderLineForSave());
+                lines.Insert(0, Student.GetHeaderLineForSave());
                 File.WriteAllLines(FilePath, lines);
                 ConsoleWriteYellowLine("See you!");
                 Environment.Exit(0);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                ConsoleWriteRedLine("Save Error:\n"+ex.Message);
+                ConsoleWriteRedLine("Save Error:\n" + ex.Message);
             }
 
         }
