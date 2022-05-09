@@ -12,7 +12,7 @@ namespace FileIoDemoForPiPi
         /// <summary>
         /// 文件在硬盘中的路径
         /// </summary>
-        static readonly string FilePath = @"C:\Users\jinge\Desktop\Students.csv";
+        static readonly string FilePath = @"C:\CSV Output Folder\Students.csv";
         /// <summary>
         /// 全局变量，学生对象列表
         /// </summary>
@@ -43,7 +43,9 @@ namespace FileIoDemoForPiPi
             }
             catch
             {
-                ConsoleWriteRedLine("Cannot find or read the file: " + FilePath);
+                ConsoleWriteYellowLine("Cannot find the file in " + FilePath+", the app will create it automatically.\n");
+                CreateFile();
+                ReadFile();
             }
             try
             {
@@ -108,7 +110,7 @@ namespace FileIoDemoForPiPi
         /// </summary>
         public static void ShowStudentList()
         {
-            ConsoleWriteYellowLine(Student.GetHeaderLine());
+            ConsoleWriteYellowLine(Student.GetHeaderLineForPrint());
             foreach (Student s in StudentList)
             {
                 ConsoleWriteYellowLine(s.ToString());
@@ -118,7 +120,7 @@ namespace FileIoDemoForPiPi
         }
 
         /// <summary>
-        /// 新增一个学生
+        /// 新增一条学生记录
         /// </summary>
         public static void Create()
         {
@@ -143,7 +145,7 @@ namespace FileIoDemoForPiPi
         }
 
         /// <summary>
-        /// 删除一个学生
+        /// 删除一条学生记录
         /// </summary>
         public static void Delete()
         {
@@ -167,7 +169,7 @@ namespace FileIoDemoForPiPi
         }
 
         /// <summary>
-        /// 更新一个学生的信息
+        /// 修改一条学生记录
         /// </summary>
         public static void Update()
         {
@@ -193,7 +195,7 @@ namespace FileIoDemoForPiPi
             }
             else
             {
-                ConsoleWriteYellowLine(Student.GetHeaderLine());
+                ConsoleWriteYellowLine(Student.GetHeaderLineForPrint());
                 ConsoleWriteYellowLine(student.ToString());
                 //后面添加一个空行，为了美观
                 Console.WriteLine();
@@ -207,10 +209,11 @@ namespace FileIoDemoForPiPi
         {
             try
             {
-                List<string> lines = StudentList.Select(x => x.ToSaveString()).ToList();
+                List<string> lines = StudentList.Select(x => x.ToStringForSave()).ToList();
                 lines.Insert(0, Student.GetHeaderLineForSave());
                 File.WriteAllLines(FilePath, lines);
                 ConsoleWriteYellowLine("See you!");
+                //结束应用程序的执行,即关闭程序返回操作系统。
                 Environment.Exit(0);
             }
             catch (Exception ex)
@@ -226,6 +229,7 @@ namespace FileIoDemoForPiPi
         public static void ExitWithoutSaving()
         {
             ConsoleWriteYellowLine("See you!");
+            //结束应用程序的执行,即关闭程序返回操作系统。
             Environment.Exit(0);
         }
 
@@ -247,7 +251,7 @@ namespace FileIoDemoForPiPi
             }
             else
             {
-                ConsoleWriteYellowLine(Student.GetHeaderLine());
+                ConsoleWriteYellowLine(Student.GetHeaderLineForPrint());
                 ConsoleWriteYellowLine(student.ToString());
                 //后面添加一个空行，为了美观
                 Console.WriteLine();
@@ -302,5 +306,31 @@ namespace FileIoDemoForPiPi
             Console.ForegroundColor = ConsoleColor.White;
         }
 
+        /// <summary>
+        /// 当用户电脑中没有该文件的时候，自动在路径中创建该文件。
+        /// </summary>
+        public static void CreateFile()
+        {
+            try
+            {
+                List<string> lines = new List<string>();
+                lines.Add(Student.GetHeaderLineForSave());
+                lines.Add("1,Mike,60,70,60,70");
+                lines.Add("2,Lucy,88,75,90,80");
+                lines.Add("3,Richard,61,71,70,88");
+                //创建文件夹
+                Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
+                //创建文件
+                File.WriteAllLines(FilePath, lines);
+                ConsoleWriteYellowLine($"Create file in {FilePath} successfully.\n");
+            }
+            catch(Exception ex)
+            {
+                ConsoleWriteRedLine("Create file failed.\n" + ex.Message);
+                ConsoleWriteYellowLine("\nThe app have automatically exit.");
+                Environment.Exit(0);
+            }
+
+        }
     }
 }
